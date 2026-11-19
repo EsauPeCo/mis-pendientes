@@ -2,7 +2,23 @@ import XCTest
 
 /// Recorrido que se graba con `simctl io recordVideo` para la vista previa (App Preview) de la tienda.
 final class RecorridoUITests: XCTestCase {
-    func testRecorridoParaVistaPrevia() throws {
+    /// Se ejecuta primero (orden alfabético): abre el teclado una vez y cierra el aviso
+    /// «Speed up your typing…» de iOS para que no aparezca en el video.
+    func testA_PrepararTeclado() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-demo", "YES", "-pantalla", "video"]
+        app.launch()
+        app.buttons["nueva"].tap()
+        let titulo = app.textFields["titulo"]
+        XCTAssertTrue(titulo.waitForExistence(timeout: 5))
+        titulo.tap()
+        let continuar = app.buttons["Continue"]
+        if continuar.waitForExistence(timeout: 4) { continuar.tap() }
+        app.terminate()
+        pausa(3)
+    }
+
+    func testB_RecorridoParaVistaPrevia() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-demo", "YES", "-pantalla", "video", "-AppleLanguages", "(es-MX)", "-AppleLocale", "es_MX"]
         app.launch()
