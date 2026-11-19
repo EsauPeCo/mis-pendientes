@@ -36,6 +36,8 @@ echo "Simulador: $TIPO $UDID"
 xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b >/dev/null
 xcrun simctl spawn "$UDID" defaults write -g AppleLanguages -array es-MX
 xcrun simctl spawn "$UDID" defaults write -g AppleLocale -string es_MX
+# Sin el aviso «Speed up your typing by sliding…» del teclado (lo mismo que hace fastlane snapshot)
+xcrun simctl spawn "$UDID" defaults write com.apple.keyboard.ContinuousPath KeyboardContinuousPathEnabled -bool false
 xcrun simctl shutdown "$UDID"; xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b >/dev/null
 
 cap 04-compilacion "xcodebuild build -scheme MisPendientes -destination \"id=\$UDID\" -derivedDataPath build/DD > build/compilacion.log 2>&1
