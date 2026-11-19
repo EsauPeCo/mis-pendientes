@@ -16,8 +16,19 @@ foto() { limite 20 screencapture -x "$X/$1.png" && echo "captura Xcode $1"; }
 
 XCODE_APP="$(xcode-select -p | sed 's|/Contents/Developer$||')"
 echo "Xcode: $XCODE_APP" > "$D/xcode-0-app.txt"
+limite 240 sudo xcodebuild -runFirstLaunch >> "$D/xcode-0-app.txt" 2>&1
+xcodebuild -checkFirstLaunchStatus >> "$D/xcode-0-app.txt" 2>&1; echo "checkFirstLaunchStatus: $?" >> "$D/xcode-0-app.txt"
 limite 30 open -a "$XCODE_APP" MisPendientes.xcodeproj >> "$D/xcode-0-app.txt" 2>&1
-for n in 1 2 3 4; do sleep 30; foto "0$n-proyecto"; done
+sleep 45; foto 01-proyecto
+# Si aparece el diálogo de componentes del primer arranque, cerrarlo con Escape / Cmd+W
+for tecla in 'key code 53' 'keystroke "w" using command down'; do
+  limite 20 osascript -e "tell application \"System Events\" to $tecla" >> "$D/xcode-0-app.txt" 2>&1
+  sleep 8
+done
+sleep 20; foto 02-proyecto
+limite 30 open -a "$XCODE_APP" MisPendientes.xcodeproj
+sleep 40; foto 03-proyecto
+defaults read com.apple.dt.Xcode > "$D/xcode-defaults.txt" 2>&1
 # Abrir también el archivo principal de la lista en el mismo proyecto
 limite 30 open -a "$XCODE_APP" MisPendientes/Vistas/ListaTareasView.swift
 sleep 30; foto 05-codigo
