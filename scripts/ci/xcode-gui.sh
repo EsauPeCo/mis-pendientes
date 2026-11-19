@@ -20,12 +20,14 @@ limite 240 sudo xcodebuild -runFirstLaunch >> "$D/xcode-0-app.txt" 2>&1
 xcodebuild -checkFirstLaunchStatus >> "$D/xcode-0-app.txt" 2>&1; echo "checkFirstLaunchStatus: $?" >> "$D/xcode-0-app.txt"
 limite 30 open -a "$XCODE_APP" MisPendientes.xcodeproj >> "$D/xcode-0-app.txt" 2>&1
 sleep 45; foto 01-proyecto
-# Si aparece el diálogo de componentes del primer arranque, cerrarlo con Escape / Cmd+W
-for tecla in 'key code 53' 'keystroke "w" using command down'; do
-  limite 20 osascript -e "tell application \"System Events\" to $tecla" >> "$D/xcode-0-app.txt" 2>&1
-  sleep 8
-done
-sleep 20; foto 02-proyecto
+# Diálogo de componentes del primer arranque: desmarcar plataformas extra y continuar.
+# Coordenadas medidas en la pantalla de 1024x768 del runner.
+brew install cliclick >/dev/null 2>&1
+for y in 390 429 468 508 574; do limite 10 cliclick c:350,$y >> "$D/xcode-0-app.txt" 2>&1; sleep 1; done
+sleep 2; foto 02-componentes
+limite 10 cliclick c:512,627 >> "$D/xcode-0-app.txt" 2>&1
+sleep 30; foto 02-proyecto
+sleep 30; foto 02b-proyecto
 limite 30 open -a "$XCODE_APP" MisPendientes.xcodeproj
 sleep 40; foto 03-proyecto
 defaults read com.apple.dt.Xcode > "$D/xcode-defaults.txt" 2>&1
