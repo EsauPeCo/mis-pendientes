@@ -2,6 +2,10 @@ name: Evidencia del Reto 5
 
 on:
   workflow_dispatch:
+    inputs:
+      parte:
+        description: "todo = toda la evidencia; xcode = solo las capturas de Xcode"
+        default: todo
   push:
     branches: [main]
     paths-ignore:
@@ -20,7 +24,12 @@ jobs:
       - name: Instalar XcodeGen
         run: brew install xcodegen
       - name: Generar evidencia
-        run: bash scripts/ci/evidencia.sh
+        run: |
+          if [ "${{ inputs.parte }}" = "xcode" ]; then
+            xcodegen generate --spec project.yml && bash scripts/ci/xcode-gui.sh
+          else
+            bash scripts/ci/evidencia.sh
+          fi
       - name: Subir evidencia
         if: always()
         uses: actions/upload-artifact@v4

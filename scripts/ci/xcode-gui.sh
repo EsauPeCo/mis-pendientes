@@ -11,12 +11,15 @@ cd "$RAIZ"
 foto() { sleep "${2:-2}"; screencapture -x "$X/$1.png" && echo "captura Xcode $1"; }
 
 system_profiler SPDisplaysDataType > "$D/pantalla.txt" 2>&1
-open -a Xcode MisPendientes.xcodeproj
-sleep 40
+XCODE_APP="$(xcode-select -p | sed 's|/Contents/Developer$||')"
+echo "Xcode: $XCODE_APP" > "$D/xcode-0-app.txt"
+open -a "$XCODE_APP" MisPendientes.xcodeproj >> "$D/xcode-0-app.txt" 2>&1
+sleep 60
+pgrep -fl Xcode >> "$D/xcode-0-app.txt" 2>&1
 
 osascript > "$D/xcode-1-abrir.txt" 2>&1 <<'OSA'
 tell application "Finder" to set pantalla to bounds of window of desktop
-tell application "Xcode"
+tell application id "com.apple.dt.Xcode"
   activate
   repeat 90 times
     try
@@ -56,7 +59,7 @@ foto 02-editor-proyecto 3
 
 # Compilar para el simulador
 osascript > "$D/xcode-3-simulador.txt" 2>&1 <<'OSA'
-tell application "Xcode"
+tell application id "com.apple.dt.Xcode"
   set ws to active workspace document
   try
     set active run destination of ws to (first run destination of ws whose name contains "Pro Max")
@@ -73,7 +76,7 @@ foto 03-compilacion-simulador 3
 
 # Compilar para un dispositivo real: aquí aparece el error de firma (sin equipo de desarrollo)
 osascript > "$D/xcode-4-dispositivo.txt" 2>&1 <<'OSA'
-tell application "Xcode"
+tell application id "com.apple.dt.Xcode"
   set ws to active workspace document
   try
     set active run destination of ws to (first run destination of ws whose name contains "Any iOS Device")

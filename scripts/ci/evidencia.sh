@@ -92,11 +92,10 @@ security unlock-keychain -p "$KCPASS" "$KC"
 security import distribucion.p12 -k "$KC" -P "$KCPASS" -T /usr/bin/codesign -T /usr/bin/security >/dev/null
 security set-key-partition-list -S apple-tool:,apple: -s -k "$KCPASS" "$KC" >/dev/null
 security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
-sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain distribucion.crt
 cd "$RAIZ"
 
 cap 09-certificado "openssl x509 -in build/firma/distribucion.crt -noout -subject -issuer -dates -ext extendedKeyUsage
-security find-identity -v -p codesigning build/firma/reto5.keychain-db"
+security find-identity -p codesigning \$KC"
 
 # Perfil de aprovisionamiento de App Store simulado (el real lo firma Apple)
 CREADO=$(date -u +%Y-%m-%dT%H:%M:%SZ); VENCE=$(date -u -v+1y +%Y-%m-%dT%H:%M:%SZ)
@@ -135,7 +134,8 @@ plutil -p build/firma/perfil-decodificado.plist | grep -vE 'DeveloperCertificate
 
 cap 11-firma "/usr/libexec/PlistBuddy -x -c 'Print :Entitlements' build/firma/perfil-decodificado.plist > build/firma/derechos.plist
 cp build/firma/embedded.mobileprovision $APP/embedded.mobileprovision
-codesign --force --sign \"\$(security find-identity -v -p codesigning $KC | awk 'NR==1{print \$2}')\" --keychain $KC \\
+IDENTIDAD=\$(security find-identity -p codesigning \$KC | awk '/1\\)/{print \$2; exit}')
+codesign --force --sign \$IDENTIDAD --keychain \$KC \\
   --entitlements build/firma/derechos.plist --generate-entitlement-der $APP
 codesign --verify --strict --verbose=2 $APP
 codesign -dvv $APP 2>&1 | grep -E '^(Identifier|Format|Authority|TeamIdentifier|Signed Time|Sealed Resources)'
